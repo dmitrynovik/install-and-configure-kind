@@ -1,13 +1,13 @@
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+sudo kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
 
-kubectl wait --namespace metallb-system \
+sudo kubectl wait --namespace metallb-system \
                 --for=condition=ready pod \
                 --selector=app=metallb \
                 --timeout=90s
 
-docker network inspect -f '{{.IPAM.Config}}' kind
+sudo docker network inspect -f '{{.IPAM.Config}}' kind
 
-cat <<EOF | kubectl apply -f -
+cat <<EOF | sudo kubectl apply -f -
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:

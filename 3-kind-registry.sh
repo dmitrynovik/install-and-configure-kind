@@ -5,7 +5,7 @@ set -o errexit
 reg_name='kind-registry'
 reg_port='5001'
 if [ "$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)" != 'true' ]; then
-  docker run \
+  sudo docker run \
     -d --restart=always -p "127.0.0.1:${reg_port}:5000" --name "${reg_name}" \
     registry:2
 fi
@@ -18,7 +18,7 @@ fi
 # https://github.com/kubernetes-sigs/kind/issues/2875
 # https://github.com/containerd/containerd/blob/main/docs/cri/config.md#registry-configuration
 # See: https://github.com/containerd/containerd/blob/main/docs/hosts.md
-cat <<EOF | kind create cluster --config=-
+cat <<EOF | sudo kind create cluster --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
@@ -36,17 +36,17 @@ EOF
 # We want a consistent name that works from both ends, so we tell containerd to
 # alias localhost:${reg_port} to the registry container when pulling images
 REGISTRY_DIR="/etc/containerd/certs.d/localhost:${reg_port}"
-for node in $(kind get nodes); do
-  docker exec "${node}" mkdir -p "${REGISTRY_DIR}"
-  cat <<EOF | docker exec -i "${node}" cp /dev/stdin "${REGISTRY_DIR}/hosts.toml"
+for node in $(sudo kind get nodes); do
+  sudo docker exec "${node}" mkdir -p "${REGISTRY_DIR}"
+  cat <<EOF | sudo docker exec -i "${node}" cp /dev/stdin "${REGISTRY_DIR}/hosts.toml"
 [host."http://${reg_name}:5000"]
 EOF
 done
 
 # 4. Connect the registry to the cluster network if not already connected
 # This allows kind to bootstrap the network but ensures they're on the same network
-if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
-  docker network connect "kind" "${reg_name}"
+if [ "$(sudo docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
+  sudo docker network connect "kind" "${reg_name}"
 fi
 
 # 5. Document the local registry
@@ -63,6 +63,4 @@ data:
     help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
 
-sudo snap install kubectl --classic
-sudo kubectl cluster-info
 

@@ -1,4 +1,4 @@
-sudo apt install curl
+sudo apt install -y curl
 
 # For AMD64 / x86_64
 [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
