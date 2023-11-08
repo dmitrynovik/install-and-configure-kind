@@ -3,7 +3,7 @@
 This installs:
 * Docker
 * kubectl
-* Kind with local Docker registry
+* Kubernetes-in-Docker aka [Kind](https://github.com/kubernetes-sigs/kind) with local Docker registry
 * MetallLb load balancer
 
 After the script is done, you should be seeing something like this:
